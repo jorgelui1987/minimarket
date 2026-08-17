@@ -127,7 +127,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1.5">País de facturación</label>
-                            <select name="fe_pais" id="fe_pais" onchange="this.form.action = '{{ route('facturacion.config.edit') }}?pais=' + this.value + '&preview=1'; this.form.submit();" class="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none">
+                            <select name="fe_pais" id="fe_pais" onchange="window.location.href = '{{ route('facturacion.config.edit') }}?pais=' + this.value;" class="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none">
                                 <option value="PE" @selected(($pais ?? 'PE') === 'PE')>🇵🇪 Perú (SUNAT)</option>
                                 <option value="CL" @selected(($pais ?? 'PE') === 'CL')>🇨🇱 Chile (SII)</option>
                             </select>
