@@ -6,7 +6,8 @@
     <div class="max-w-4xl mx-auto">
 
         {{-- ══════════════ BANNER PERÚ / SUNAT ══════════════ --}}
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-900 text-white shadow-lg mb-6">
+        @php($esCL = ($pais ?? 'PE') === 'CL')
+        <div class="relative overflow-hidden rounded-2xl {{ $esCL ? 'bg-gradient-to-r from-blue-700 via-blue-800 to-rose-900' : 'bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-900' }} text-white shadow-lg mb-6">
             {{-- textura decorativa --}}
             <svg class="absolute right-0 top-0 h-full w-1/2 opacity-10" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="170" cy="30" r="90" stroke="white" stroke-width="10"/>
@@ -24,23 +25,34 @@
                 <div class="flex-1 min-w-0">
                     <div class="flex flex-wrap items-center gap-2.5">
                         <h1 class="text-2xl font-extrabold tracking-tight">Facturación Electrónica</h1>
-                        {{-- bandera de Perú --}}
+                        {{-- Bandera según país --}}
+                        @if ($esCL)
+                        <span class="inline-flex h-5 w-7 rounded-sm overflow-hidden ring-1 ring-white/40 shadow-sm" title="Chile">
+                            <span class="w-1/2 bg-blue-600"></span>
+                            <span class="w-1/2 bg-white"></span>
+                        </span>
+                        <span class="text-sm font-bold text-blue-50">Chile</span>
+                        @else
                         <span class="inline-flex h-5 w-7 rounded-sm overflow-hidden ring-1 ring-white/40 shadow-sm" title="Perú">
                             <span class="w-1/3 bg-red-600"></span>
                             <span class="w-1/3 bg-white"></span>
                             <span class="w-1/3 bg-red-600"></span>
                         </span>
                         <span class="text-sm font-bold text-emerald-50">Perú</span>
+                        @endif
                     </div>
-                    <p class="text-emerald-100/90 text-sm mt-1.5">
-                        Emisión de comprobantes electrónicos ante <strong class="font-semibold text-white">SUNAT</strong> ·
-                        UBL 2.1 · Boletas, facturas y notas de crédito
+                    <p class="opacity-90 text-sm mt-1.5">
+                        @if ($esCL)
+                        Emisión de documentos tributarios ante <strong class="font-semibold">SII</strong> · DTE · Facturas, boletas y notas de crédito · Folios CAF
+                        @else
+                        Emisión de comprobantes electrónicos ante <strong class="font-semibold">SUNAT</strong> · UBL 2.1 · Boletas, facturas y notas de crédito
+                        @endif
                     </p>
                 </div>
 
                 <div class="hidden md:flex flex-col items-end gap-2 shrink-0">
-                    <span class="rounded-lg bg-white/15 px-3 py-1.5 text-sm font-extrabold tracking-wide ring-1 ring-white/25">SUNAT</span>
-                    <span class="text-[11px] text-emerald-100/80">Comprobantes de Pago Electrónicos</span>
+                    <span class="rounded-lg bg-white/15 px-3 py-1.5 text-sm font-extrabold tracking-wide ring-1 ring-white/25">{{ $esCL ? 'SII' : 'SUNAT' }}</span>
+                    <span class="text-[11px] opacity-80">{{ $esCL ? 'DTE · Folios CAF' : 'Comprobantes de Pago Electrónicos' }}</span>
                 </div>
             </div>
 
@@ -51,12 +63,15 @@
                     {{ $settings['fe_enabled'] === '1' ? 'Habilitada' : 'Deshabilitada' }}
                 </span>
                 <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset bg-white/10 text-white ring-white/20">Driver: {{ $settings['fe_driver'] }}</span>
+                @if (!$esCL)
                 <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset {{ $settings['fe_mode'] === 'produccion' ? 'bg-amber-400/25 text-amber-50 ring-amber-300/40' : 'bg-white/10 text-white ring-white/20' }}">Modo: {{ $settings['fe_mode'] }}</span>
+                @endif
                 <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset {{ $certOk ? 'bg-emerald-400/20 text-emerald-50 ring-emerald-300/40' : 'bg-rose-400/25 text-rose-50 ring-rose-300/40' }}">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $certOk ? 'm4.5 12.75 6 6 9-13.5' : 'M6 18 18 6M6 6l12 12' }}"/></svg>
                     Certificado {{ $certOk ? 'encontrado' : 'no encontrado' }}
                 </span>
 
+                @if (!$esCL)
                 <form method="POST" action="{{ route('facturacion.config.test') }}" class="ml-auto">
                     @csrf
                     <button type="submit" class="inline-flex items-center gap-1.5 rounded-lg bg-white/15 hover:bg-white/25 px-3 py-1.5 text-xs font-bold ring-1 ring-white/25 transition">
@@ -64,6 +79,7 @@
                         Probar conexión con SUNAT
                     </button>
                 </form>
+                @endif
             </div>
         </div>
 
@@ -95,6 +111,31 @@
 
         <form method="POST" action="{{ route('facturacion.config.update') }}">
             @csrf @method('PUT')
+
+            {{-- ══════════ País fiscal ══════════ --}}
+            <div class="rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden mb-4">
+                <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50/60">
+                    <div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800">País fiscal</h3>
+                        <p class="text-xs text-slate-500">Selecciona el país donde emites comprobantes electrónicos</p>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">País de facturación</label>
+                            <select name="fe_pais" id="fe_pais" onchange="this.form.action = '{{ route('facturacion.config.edit') }}?pais=' + this.value + '&preview=1'; this.form.submit();" class="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none">
+                                <option value="PE" @selected(($pais ?? 'PE') === 'PE')>🇵🇪 Perú (SUNAT)</option>
+                                <option value="CL" @selected(($pais ?? 'PE') === 'CL')>🇨🇱 Chile (SII)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-3">Al cambiar de país se mostrarán los campos de configuración correspondientes.</p>
+                </div>
+            </div>
 
             {{-- ══════════ Estado y modo ══════════ --}}
             <div class="rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden mb-4">
@@ -157,6 +198,28 @@
                     </div>
                 </div>
                 <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    @if ($esCL)
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">RUT del emisor <span class="text-red-500">*</span></label>
+                        <input type="text" name="fe_rut" value="{{ old('fe_rut', $settings['fe_rut']) }}" placeholder="76123456-7" maxlength="12" required
+                            class="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Razón social <span class="text-red-500">*</span></label>
+                        <input type="text" name="fe_razon_social_cl" value="{{ old('fe_razon_social_cl', $settings['fe_razon_social_cl']) }}" required
+                            class="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Giro</label>
+                        <input type="text" name="fe_giro" value="{{ old('fe_giro', $settings['fe_giro']) }}"
+                            class="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Dirección fiscal</label>
+                        <input type="text" name="fe_direccion_cl" value="{{ old('fe_direccion_cl', $settings['fe_direccion_cl']) }}"
+                            class="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none">
+                    </div>
+                    @else
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1.5">RUC <span class="text-red-500">*</span></label>
                         <input type="text" name="fe_ruc" value="{{ old('fe_ruc', $settings['fe_ruc']) }}" maxlength="11" required
@@ -177,6 +240,8 @@
                         <input type="text" name="fe_direccion" value="{{ old('fe_direccion', $settings['fe_direccion']) }}"
                             class="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none">
                     </div>
+                    @endif
+                    @if (!$esCL)
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1.5">Ubigeo</label>
                         <input type="text" name="fe_ubigeo" value="{{ old('fe_ubigeo', $settings['fe_ubigeo']) }}" maxlength="6"
@@ -197,6 +262,7 @@
                         <input type="text" name="fe_distrito" value="{{ old('fe_distrito', $settings['fe_distrito']) }}"
                             class="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none">
                     </div>
+                    @endif
                 </div>
             </div>
 
@@ -207,15 +273,45 @@
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z"/></svg>
                     </div>
                     <div>
-                        <h3 class="font-bold text-slate-800">Credenciales SUNAT</h3>
+                        <h3 class="font-bold text-slate-800">{{ $esCL ? 'Credenciales SII' : 'Credenciales SUNAT' }}</h3>
                         <p class="text-xs text-slate-500">Clave SOL y certificado digital</p>
                     </div>
                 </div>
                 <div class="p-6">
+                    @if ($esCL)
+                    <div class="flex items-start gap-2 rounded-xl bg-sky-50 text-sky-800 px-4 py-3 text-xs mb-4 ring-1 ring-sky-100">
+                        <svg class="w-4 h-4 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>
+                        <span>En <strong>Chile</strong> debes tener tu <strong>certificado digital</strong> (firma electrónica avanzada) y los <strong>folios CAF</strong> descargados del SII.</span>
+                    </div>
+                    @else
                     <div class="flex items-start gap-2 rounded-xl bg-sky-50 text-sky-800 px-4 py-3 text-xs mb-4 ring-1 ring-sky-100">
                         <svg class="w-4 h-4 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>
                         <span>En <strong>beta</strong> puedes usar RUC <strong>20000000001</strong> con usuario y clave <strong>MODDATOS</strong>.</span>
                     </div>
+                    @endif
+                    @if ($esCL)
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="sm:col-span-2">
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">Ruta del certificado (.pem)</label>
+                            <input type="text" name="fe_cert_path_cl" value="{{ old('fe_cert_path_cl', $settings['fe_cert_path_cl']) }}" placeholder="storage/facturacion/cl/certificate.pem"
+                                class="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none">
+                            <p class="flex items-center gap-1.5 text-xs {{ $certOk ? 'text-emerald-600' : 'text-rose-600' }} mt-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $certOk ? 'm4.5 12.75 6 6 9-13.5' : 'M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z' }}"/></svg>
+                                {{ $certOk ? 'Certificado encontrado en la ruta indicada.' : 'No se encontró el certificado en la ruta indicada.' }}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">Password del certificado</label>
+                            <input type="password" name="fe_cert_pass" value="{{ old('fe_cert_pass', $settings['fe_cert_pass']) }}" autocomplete="new-password"
+                                class="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">Directorio de folios CAF</label>
+                            <input type="text" name="fe_caf_dir" value="{{ old('fe_caf_dir', $settings['fe_caf_dir']) }}" placeholder="storage/facturacion/cl/caf"
+                                class="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none">
+                        </div>
+                    </div>
+                    @else
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1.5">Usuario Clave SOL</label>
@@ -237,6 +333,7 @@
                             </p>
                         </div>
                     </div>
+                    @endif
                 </div>
             </div>
 

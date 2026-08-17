@@ -38,6 +38,30 @@ final class BillingSettings
         return (string) Setting::get('fe_rest_token', config('billing.token', ''));
     }
 
+    /** País fiscal activo: 'PE' (SUNAT) o 'CL' (SII). */
+    public static function country(): string
+    {
+        return strtoupper((string) Setting::get('fe_pais', config('billing.default_country', 'PE')));
+    }
+
+    /** Configuración del emisor CL para el gateway SII (Chile). */
+    public static function cl(): array
+    {
+        $c = (array) config('facturacion.cl');
+
+        return [
+            'rut_emisor'       => Setting::get('fe_rut', $c['rut_emisor'] ?? ''),
+            'certificate_path' => Setting::get('fe_cert_path_cl', $c['certificate_path'] ?? ''),
+            'certificate_pass' => Setting::get('fe_cert_pass', $c['certificate_pass'] ?? ''),
+            'caf_directory'    => Setting::get('fe_caf_dir', $c['caf_directory'] ?? ''),
+            'razon_social'     => Setting::get('fe_razon_social_cl', $c['emisor']['razon_social'] ?? ''),
+            'giro'             => Setting::get('fe_giro', $c['emisor']['giro'] ?? ''),
+            'direccion'        => Setting::get('fe_direccion_cl', $c['emisor']['direccion'] ?? ''),
+            'comuna'           => Setting::get('fe_comuna', $c['emisor']['comuna'] ?? ''),
+            'ciudad'           => Setting::get('fe_ciudad', $c['emisor']['ciudad'] ?? ''),
+        ];
+    }
+
     /** Configuración del emisor PE para el gateway SUNAT (Greenter). */
     public static function pe(): array
     {
