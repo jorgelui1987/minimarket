@@ -1,0 +1,31 @@
+{
+    "name": "saas-minimarket/facturacion",
+    "description": "Servicio de facturacion electronica multi-pais (SUNAT/DIAN/SII/ARCA/SAT) para el ERP Minimarket. Clean Architecture + DDD + Strategy/Adapter.",
+    "type": "library",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.1",
+        "ext-openssl": "*",
+        "ext-soap": "*",
+        "ext-zip": "*",
+        "ext-dom": "*",
+        "greenter/greenter": "^5.1",
+        "greenter/report": "^2.0"
+    },
+    "suggest": {
+        "greenter/report": "Genera la representacion impresa (PDF) del comprobante SUNAT"
+    },
+    "autoload": {
+        "psr-4": {
+            "Facturacion\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Facturacion\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}
