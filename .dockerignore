@@ -1,0 +1,55 @@
+# Credenciales
+.env
+.env.backup
+.env.production
+.env.*.local
+
+# Dependencias (se instalan dentro del contenedor)
+node_modules
+vendor
+
+# Git
+.git
+.gitignore
+
+# IDE / Editor
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+
+# Laravel / PHP
+/storage/*.key
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*
+/public/build
+/public/hot
+/public/storage
+.phpunit.result.cache
+.phpunit.cache
+.phpactor.json
+.php_cs.cache
+.php-cs-fixer.cache
+vendor-bin
+composer.phar
+
+# Logs y temporales
+logs
+*.log
+npm-debug.log
+yarn-error.log
+
+# Base de datos local, no debe ir a la imagen
+*.sql
+bk_basededatos.sql
+
+# Documentación interna (no requerida en runtime)
+*.docx
+*.pdf
