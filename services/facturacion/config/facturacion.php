@@ -61,7 +61,28 @@ return [
         CountryCode::CL->value => [
             'enabled'  => false,  // Fase 4
             'gateway'  => \Facturacion\Infrastructure\Gateway\Chile\ChileSiiGateway::class,
-            'endpoint' => env('CL_SII_ENDPOINT'),
+
+            // Endpoint del WebService de EnvioDTE del SII (produccion).
+            'endpoint' => env('CL_SII_ENDPOINT', 'https://palena.sii.cl/DTEWS/EnvioDTEService'),
+
+            // RUT del emisor (formato 76123456-7).
+            'rut_emisor'   => env('CL_RUT_EMISOR', '76123456-7'),
+
+            // Certificado digital (firma electronica avanzada) en formato PEM.
+            'certificate_path' => env('CL_CERT_PATH', storage_path('facturacion/cl/certificate.pem')),
+            'certificate_pass' => env('CL_CERT_PASS', ''),
+
+            // Directorio donde se guardan los CAF (.xml) descargados del SII.
+            'caf_directory'    => env('CL_CAF_DIR', storage_path('facturacion/cl/caf')),
+
+            // Datos de domicilio fiscal del emisor (para el DTE).
+            'emisor' => [
+                'razon_social' => env('CL_RAZON_SOCIAL', 'MINIMARKET DEMO LTDA'),
+                'giro'         => env('CL_GIRO', 'Venta al por menor en comercios no especializados'),
+                'direccion'    => env('CL_DIRECCION', 'Av. Principal 123'),
+                'comuna'       => env('CL_COMUNA', 'Santiago'),
+                'ciudad'       => env('CL_CIUDAD', 'Santiago'),
+            ],
         ],
 
         CountryCode::AR->value => [
