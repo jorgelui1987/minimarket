@@ -1,8 +1,13 @@
-const CACHE = 'minimarket-v2';
-const ASSETS = ['/', '/manifest.json', '/icons/icon-192.png', '/icons/icon-512.png'];
+const CACHE = 'minimarket-v3';
+// Solo archivos estáticos — NO rutas que redirigen (evita que falle la instalación)
+const ASSETS = ['/manifest.json', '/icons/icon-192.png', '/icons/icon-512.png'];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
+  e.waitUntil(
+    caches
+      .open(CACHE)
+      .then((c) => Promise.all(ASSETS.map((a) => c.add(a).catch(() => {}))))
+  );
   self.skipWaiting();
 });
 
@@ -16,7 +21,15 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
+  // Ignorar métodos que no sean GET
   if (e.request.method !== 'GET') return;
+  // Ignorar peticiones a otros dominios (CDNs, APIs externas)
+  const url = new URL(e.request.url);
+  if (url.origin !== self.location.origin) return;
+  // Ignorar peticiones de navegación — siempre red de red (la app requiere sesión)
+  if (e.request.mode === 'navigate') return;
+
+  // Estrategia: cache primero, red como respaldo (solo para assets estáticos)
   e.respondWith(
     caches.match(e.request).then((cached) => {
       const network = fetch(e.request)
