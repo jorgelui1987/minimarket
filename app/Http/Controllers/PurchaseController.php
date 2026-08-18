@@ -33,6 +33,15 @@ class PurchaseController extends Controller
         ]);
     }
 
+    /** Vista móvil optimizada para el trabajador (PWA). */
+    public function movil(): View
+    {
+        return view('purchases.movil', [
+            'suppliers' => Supplier::orderBy('name')->get(),
+            'products' => Product::orderBy('name')->get(['id', 'name', 'cost', 'stock', 'unit']),
+        ]);
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([

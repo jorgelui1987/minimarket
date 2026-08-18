@@ -89,6 +89,7 @@ Route::middleware('auth')->group(function () {
             // Compras
             Route::get('compras', [PurchaseController::class, 'index'])->name('compras.index');
             Route::get('compras/crear', [PurchaseController::class, 'create'])->name('compras.create');
+            Route::get('compras/movil', [PurchaseController::class, 'movil'])->name('compras.movil');
             Route::post('compras', [PurchaseController::class, 'store'])->name('compras.store');
             Route::get('compras/{compra}', [PurchaseController::class, 'show'])->name('compras.show');
 
