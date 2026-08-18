@@ -24,8 +24,9 @@ class InventoryController extends Controller
 
         $totalProductos = Product::count();
         $valorInventario = (float) Product::sum(DB::raw('cost * stock'));
+        $productos = Product::where('is_active', true)->orderBy('name')->get(['id', 'name', 'unit', 'stock']);
 
-        return view('inventory.index', compact('sinStock', 'stockBajo', 'totalProductos', 'valorInventario'));
+        return view('inventory.index', compact('sinStock', 'stockBajo', 'totalProductos', 'valorInventario', 'productos'));
     }
 
     /** Kardex: historial de movimientos de inventario. */
@@ -74,5 +75,37 @@ class InventoryController extends Controller
         });
 
         return back()->with('success', "Stock de «{$product->name}» ajustado correctamente.");
+    }
+
+    /** Registra merma (pérdida de producto por descomposición, daño, etc.). */
+    public function merma(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'product_id' => ['required', 'exists:products,id'],
+            'quantity' => ['required', 'numeric', 'gt:0'],
+            'motivo' => ['required', 'string', 'max:255'],
+        ]);
+
+        $product = Product::findOrFail($data['product_id']);
+        $quantity = (float) $data['quantity'];
+
+        if ($quantity > (float) $product->stock) {
+            return back()->with('error', "La merma ({$quantity}) no puede ser mayor al stock actual ({$product->stock}).");
+        }
+
+        DB::transaction(function () use ($product, $quantity, $data) {
+            $nuevoStock = (float) $product->stock - $quantity;
+            $product->update(['stock' => $nuevoStock]);
+            StockMovement::record(
+                $product,
+                -$quantity,
+                'merma',
+                'merma',
+                null,
+                $data['motivo']
+            );
+        });
+
+        return back()->with('success', "Merma de «{$product->name}» registrada: {$quantity} unidades.");
     }
 }

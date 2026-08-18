@@ -8,10 +8,16 @@
             <h2 class="text-xl font-extrabold text-slate-800">Control de Inventario</h2>
             <p class="text-sm text-slate-500">Alertas de stock y estado general del inventario</p>
         </div>
-        <a href="{{ route('inventario.kardex') }}" class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-brand-700">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
-            Ver Kardex
-        </a>
+        <div class="flex items-center gap-2">
+            <button type="button" onclick="document.getElementById('mermaModal').classList.remove('hidden')" class="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-rose-700">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
+                Registrar merma
+            </button>
+            <a href="{{ route('inventario.kardex') }}" class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-brand-700">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+                Ver Kardex
+            </a>
+        </div>
     </div>
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -86,6 +92,54 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+
+    {{-- Modal de merma --}}
+    <div id="mermaModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div class="w-full max-w-md rounded-2xl bg-white shadow-xl">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+                <h3 class="font-bold text-slate-800">Registrar merma</h3>
+                <button type="button" onclick="document.getElementById('mermaModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <form method="POST" action="{{ route('inventario.merma') }}" class="p-6 space-y-4">
+                @csrf
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">Producto <span class="text-red-500">*</span></label>
+                    <select name="product_id" required class="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-100 outline-none">
+                        <option value="">Seleccionar producto...</option>
+                        @foreach ($productos as $p)
+                            <option value="{{ $p->id }}">{{ $p->name }} ({{ $p->unit }} · stock: {{ $p->stock }})</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">Cantidad (kg o unidades) <span class="text-red-500">*</span></label>
+                    <input type="number" name="quantity" step="0.001" min="0.001" required placeholder="Ej: 2.5"
+                        class="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-100 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">Motivo <span class="text-red-500">*</span></label>
+                    <select name="motivo" required class="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-100 outline-none">
+                        <option value="">Seleccionar motivo...</option>
+                        <option value="Se pudrió / se descompuso">Se pudrió / se descompuso</option>
+                        <option value="Se dañó / se aplastó">Se dañó / se aplastó</option>
+                        <option value="Se venció">Se venció</option>
+                        <option value="Se perdió / robo">Se perdió / robo</option>
+                        <option value="Se regaló / se consumió">Se regaló / se consumió</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+                <div class="flex items-center justify-end gap-3 pt-2">
+                    <button type="button" onclick="document.getElementById('mermaModal').classList.add('hidden')" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800">Cancelar</button>
+                    <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-rose-700">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                        Registrar merma
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 @endsection

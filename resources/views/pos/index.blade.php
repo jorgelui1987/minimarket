@@ -96,7 +96,8 @@
 
         function addToCart(p) {
             if (!cart[p.id]) cart[p.id] = { ...p, qty: 0 };
-            if (cart[p.id].qty < p.stock) cart[p.id].qty++;
+            // Para productos en KG (verdulería), agrega 1 kg por defecto
+            if (cart[p.id].qty < p.stock) cart[p.id].qty = (p.unit === 'KG' || p.unit === 'KGM') ? 1 : cart[p.id].qty + 1;
             renderCart();
             renderGrid(document.getElementById('search').value);
         }
@@ -106,6 +107,25 @@
             cart[id].qty += delta;
             if (cart[id].qty <= 0) delete cart[id];
             else if (cart[id].qty > cart[id].stock) cart[id].qty = cart[id].stock;
+            renderCart();
+            renderGrid(document.getElementById('search').value);
+        }
+
+        // Permite escribir la cantidad exacta (peso en kg para verdulería)
+        function setQty(id, value) {
+            if (!cart[id]) return;
+            const v = parseFloat(value);
+            if (isNaN(v) || v <= 0) { delete cart[id]; }
+            else if (v > cart[id].stock) { cart[id].qty = cart[id].stock; }
+            else { cart[id].qty = v; }
+            renderCart();
+            renderGrid(document.getElementById('search').value);
+        }
+
+        // Botones de peso rápido para productos en KG
+        function quickWeight(id, kg) {
+            if (!cart[id]) return;
+            cart[id].qty = kg;
             renderCart();
             renderGrid(document.getElementById('search').value);
         }
@@ -125,18 +145,26 @@
                 const it = cart[id];
                 const sub = it.price * it.qty;
                 total += sub;
+                const esKG = (it.unit === 'KG' || it.unit === 'KGM');
                 const row = document.createElement('div');
                 row.className = 'flex items-center gap-2 rounded-lg bg-slate-50 p-2';
                 row.innerHTML = `
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-medium text-slate-800 truncate">${it.name}</p>
-                        <p class="text-xs text-slate-400">${money(it.price)} c/u</p>
+                        <p class="text-xs text-slate-400">${money(it.price)} ${esKG ? '/kg' : 'c/u'}</p>
                     </div>
                     <div class="flex items-center gap-1">
-                        <button type="button" onclick="changeQty(${id},-1)" class="w-6 h-6 rounded bg-white border border-slate-200 text-slate-600">−</button>
-                        <span class="w-7 text-center text-sm font-semibold">${it.qty}</span>
-                        <button type="button" onclick="changeQty(${id},1)" class="w-6 h-6 rounded bg-white border border-slate-200 text-slate-600">+</button>
+                        <button type="button" onclick="changeQty(${id},-0.5)" class="w-6 h-6 rounded bg-white border border-slate-200 text-slate-600">−</button>
+                        <input type="number" step="0.001" min="0.001" value="${it.qty}" onchange="setQty(${id}, this.value)"
+                            class="w-16 text-center text-sm font-semibold border border-slate-200 rounded px-1 py-0.5 outline-none focus:border-brand-500">
+                        <button type="button" onclick="changeQty(${id},0.5)" class="w-6 h-6 rounded bg-white border border-slate-200 text-slate-600">+</button>
                     </div>
+                    ${esKG ? `
+                    <div class="flex gap-1">
+                        <button type="button" onclick="quickWeight(${id},0.5)" class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-bold">½kg</button>
+                        <button type="button" onclick="quickWeight(${id},1)" class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-bold">1kg</button>
+                        <button type="button" onclick="quickWeight(${id},2)" class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-bold">2kg</button>
+                    </div>` : ''}
                     <span class="w-16 text-right text-sm font-semibold text-slate-800">${money(sub)}</span>`;
                 el.appendChild(row);
             });

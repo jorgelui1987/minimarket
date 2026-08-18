@@ -41,7 +41,7 @@ class PosController extends Controller
             'document_type' => ['required', 'in:boleta,factura,ticket'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'exists:products,id'],
-            'items.*.quantity' => ['required', 'numeric', 'min:1'],
+            'items.*.quantity' => ['required', 'numeric', 'gt:0'],
         ], [
             'items.required' => 'El carrito está vacío.',
         ]);
@@ -67,7 +67,7 @@ class PosController extends Controller
                 $total = 0;
                 foreach ($data['items'] as $item) {
                     $product = Product::lockForUpdate()->find($item['product_id']);
-                    $qty = (int) $item['quantity'];
+                    $qty = (float) $item['quantity'];
 
                     if ($product->stock < $qty) {
                         throw new \RuntimeException("Stock insuficiente para {$product->name} (disponible: {$product->stock}).");

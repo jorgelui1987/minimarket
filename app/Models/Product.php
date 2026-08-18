@@ -18,6 +18,8 @@ class Product extends Model
     protected $casts = [
         'cost' => 'decimal:2',
         'price' => 'decimal:2',
+        'stock' => 'decimal:3',
+        'min_stock' => 'decimal:3',
         'is_active' => 'boolean',
     ];
 
