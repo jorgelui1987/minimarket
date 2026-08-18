@@ -60,6 +60,7 @@
             ['label' => 'Mi Suscripción', 'route' => 'suscripcion', 'icon' => 'shield'],
             ['label' => 'Configuración', 'route' => 'configuracion.edit', 'icon' => 'cog'],
             ['label' => 'Facturación Electrónica', 'route' => 'facturacion.config.edit', 'icon' => 'doc'],
+            ['label' => 'Facturación Chile (DTE)', 'route' => 'facturacionchile.index', 'icon' => 'doc'],
             ['label' => 'Backup', 'route' => 'backup', 'icon' => 'database'],
         ]],
     ];

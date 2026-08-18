@@ -12,6 +12,7 @@ use App\Http\Controllers\CashRegisterController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FacturacionChileController;
 use App\Http\Controllers\FacturacionConfigController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\PosController;
@@ -135,6 +136,17 @@ Route::middleware('auth')->group(function () {
             Route::get('facturacion/configuracion', [FacturacionConfigController::class, 'edit'])->name('facturacion.config.edit');
             Route::put('facturacion/configuracion', [FacturacionConfigController::class, 'update'])->name('facturacion.config.update');
             Route::post('facturacion/configuracion/probar', [FacturacionConfigController::class, 'test'])->name('facturacion.config.test');
+
+            // Facturación Electrónica Chile (DTE / SII)
+            Route::get('facturacionchile', [FacturacionChileController::class, 'index'])->name('facturacionchile.index');
+            Route::get('facturacionchile/consultar-rut', [FacturacionChileController::class, 'consultarRut'])->name('facturacionchile.consultar-rut');
+            Route::post('facturacionchile/reintentar-lote', [FacturacionChileController::class, 'reintentarLote'])->name('facturacionchile.reintentar-lote');
+            Route::post('facturacionchile/venta/{venta_id}/emitir', [FacturacionChileController::class, 'emitirVenta'])->name('facturacionchile.emitir-venta');
+            Route::get('facturacionchile/{id}', [FacturacionChileController::class, 'ver'])->name('facturacionchile.ver');
+            Route::post('facturacionchile/{id}/nota-credito', [FacturacionChileController::class, 'notaCredito'])->name('facturacionchile.nota-credito');
+            Route::post('facturacionchile/{id}/reintentar', [FacturacionChileController::class, 'reintentar'])->name('facturacionchile.reintentar');
+            Route::get('facturacionchile/{id}/logs', [FacturacionChileController::class, 'logs'])->name('facturacionchile.logs');
+            Route::get('facturacionchile/{id}/xml', [FacturacionChileController::class, 'descargarXml'])->name('facturacionchile.xml');
 
             Route::get('backup', [BackupController::class, 'index'])->name('backup');
             Route::post('backup', [BackupController::class, 'store'])->name('backup.store');

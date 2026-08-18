@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Services\Billing\BillingClient;
 use App\Services\Billing\BillingSettings;
+use App\Services\Billing\ChileBillingClient;
 use App\Services\Billing\LocalBillingClient;
 use App\Services\Billing\NullBillingClient;
 use App\Services\Billing\RestBillingClient;
@@ -22,7 +23,15 @@ class AppServiceProvider extends ServiceProvider
                 return new NullBillingClient();
             }
 
-            return match (BillingSettings::driver()) {
+            $driver = BillingSettings::driver();
+            $country = BillingSettings::country();
+
+            // Chile: gateway SII in-process con folios CAF + certificado digital.
+            if ($country === 'CL' && $driver === 'local') {
+                return new ChileBillingClient();
+            }
+
+            return match ($driver) {
                 'local' => new LocalBillingClient(),
                 'rest'  => new RestBillingClient(BillingSettings::restUrl(), BillingSettings::restToken()),
                 default => new NullBillingClient(),

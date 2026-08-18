@@ -16,8 +16,7 @@ use App\Models\Sale;
 final class BillingService
 {
     public function __construct(
-        private readonly BillingClient $client,
-        private readonly SaleBillingMapper $mapper = new SaleBillingMapper()
+        private readonly BillingClient $client
     ) {
     }
 
@@ -34,12 +33,13 @@ final class BillingService
         }
 
         $idempotencyKey = "sale-{$sale->tenant_id}-{$sale->id}";
+        $country = BillingSettings::country() ?: 'PE';
 
         $doc = ElectronicDocument::firstOrCreate(
             ['idempotency_key' => $idempotencyKey],
             [
                 'sale_id'       => $sale->id,
-                'country'       => 'PE',
+                'country'       => $country,
                 'document_type' => $sale->document_type,
                 'series'        => $sale->series,
                 'number'        => $sale->number,
@@ -53,7 +53,7 @@ final class BillingService
         }
 
         try {
-            $payload = $this->mapper->toPayload($sale);
+            $payload = $this->mapper($country)->toPayload($sale);
             $result = $this->client->emitir($payload, $idempotencyKey);
 
             $doc->update([
@@ -70,5 +70,13 @@ final class BillingService
         }
 
         return $doc->refresh();
+    }
+
+    /** Selecciona el mapper según el país fiscal activo. */
+    private function mapper(string $country): SaleBillingMapper|ChileSaleBillingMapper
+    {
+        return $country === 'CL'
+            ? new ChileSaleBillingMapper()
+            : new SaleBillingMapper();
     }
 }

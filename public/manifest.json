@@ -2,7 +2,7 @@
   "name": "Mi Minimarket - Registro de Compras",
   "short_name": "Minimarket",
   "description": "Sistema POS para minimarket y verdulería",
-  "start_url": "/dashboard",
+  "start_url": "/compras/movil",
   "scope": "/",
   "display": "standalone",
   "background_color": "#047857",

@@ -1,4 +1,4 @@
-const CACHE = 'minimarket-v3';
+const CACHE = 'minimarket-v4';
 // Solo archivos estáticos — NO rutas que redirigen (evita que falle la instalación)
 const ASSETS = ['/manifest.json', '/icons/icon-192.png', '/icons/icon-512.png'];
 
