@@ -77,6 +77,37 @@ class InventoryController extends Controller
         return back()->with('success', "Stock de «{$product->name}» ajustado correctamente.");
     }
 
+    /** Reporte de mermas (semanal / por producto / por motivo). */
+    public function mermaReport(Request $request): View
+    {
+        $desde = $request->date('desde')?->startOfDay();
+        $hasta = $request->date('hasta')?->endOfDay();
+
+        $query = StockMovement::with(['product', 'user'])
+            ->where('type', 'merma')
+            ->when($desde, fn ($q) => $q->where('created_at', '>=', $desde))
+            ->when($hasta, fn ($q) => $q->where('created_at', '<=', $hasta));
+
+        // Totales por producto
+        $porProducto = (clone $query)
+            ->select('product_id', DB::raw('SUM(ABS(quantity)) as total_merma'), DB::raw('COUNT(*) as veces'))
+            ->groupBy('product_id')
+            ->orderByDesc('total_merma')
+            ->get();
+
+        // Totales por motivo
+        $porMotivo = (clone $query)
+            ->select('note', DB::raw('SUM(ABS(quantity)) as total_merma'), DB::raw('COUNT(*) as veces'))
+            ->groupBy('note')
+            ->orderByDesc('total_merma')
+            ->get();
+
+        $totalMerma = (float) (clone $query)->sum(DB::raw('ABS(quantity)'));
+        $movimientos = $query->latest()->paginate(25)->withQueryString();
+
+        return view('inventory.merma', compact('porProducto', 'porMotivo', 'totalMerma', 'movimientos', 'desde', 'hasta'));
+    }
+
     /** Registra merma (pérdida de producto por descomposición, daño, etc.). */
     public function merma(Request $request): RedirectResponse
     {

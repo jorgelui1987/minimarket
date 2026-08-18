@@ -97,6 +97,7 @@ Route::middleware('auth')->group(function () {
             Route::get('inventario/kardex', [InventoryController::class, 'kardex'])->name('inventario.kardex');
             Route::post('inventario/ajuste', [InventoryController::class, 'adjust'])->name('inventario.adjust');
             Route::post('inventario/merma', [InventoryController::class, 'merma'])->name('inventario.merma');
+            Route::get('inventario/mermas', [InventoryController::class, 'mermaReport'])->name('inventario.mermas');
 
             // Devoluciones (notas de crédito)
             Route::get('devoluciones', [ReturnController::class, 'index'])->name('devoluciones.index');
