@@ -1,5 +1,5 @@
-const CACHE = 'minimarket-v1';
-const ASSETS = ['/', '/manifest.json'];
+const CACHE = 'minimarket-v2';
+const ASSETS = ['/', '/manifest.json', '/icons/icon-192.png', '/icons/icon-512.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
