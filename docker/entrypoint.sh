@@ -43,10 +43,13 @@ if [ "${DB_CONNECTION:-mysql}" = "mysql" ] || [ "${DB_CONNECTION:-mysql}" = "mar
     echo "MySQL disponible."
 fi
 
-# Ejecutar migraciones (si se pide)
-if [ "${AUTO_MIGRATE:-true}" = "true" ]; then
-    echo "Ejecutando migraciones..."
-    php artisan migrate --force --no-interaction || echo "AVISO: migraciones fallaron (puede estar vacío el usuario sin privilegios para CREATE)"
+# Ejecutar migraciones SOLO si hay variables de BD (el .env NO esta en GitHub)
+if [ "${AUTO_MIGRATE:-true}" = "true" ] && [ -n "${DB_HOST:-}" ] && [ -n "${DB_USERNAME:-}" ]; then
+    echo "Ejecutando migraciones contra ${DB_HOST}..."
+    php artisan migrate --force --no-interaction || echo "❌ Migraciones fallaron. Verifica permisos ALTER del usuario."
+    echo "✅ Migraciones completadas."
+else
+    echo "⚠️ AUTO_MIGRATE omitido: faltan DB_HOST/DB_USERNAME. Configura las variables en Dockploy."
 fi
 
 # Optimización en producción
