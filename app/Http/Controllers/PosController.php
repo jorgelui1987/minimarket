@@ -30,7 +30,12 @@ class PosController extends Controller
         $customers = Customer::orderBy('name')->get(['id', 'name', 'doc_number']);
         $current = CashRegister::current();
 
-        return view('pos.index', compact('products', 'customers', 'current'));
+        // Impuesto dinámico: lee de configuración (0% si así está) y nombre según país
+        $pais = \App\Services\Billing\BillingSettings::country();
+        $igvPercent = (float) \App\Models\Setting::get('igv_percent', $pais === 'CL' ? '19' : '18');
+        $taxLabel = $pais === 'CL' ? 'IVA' : 'IGV';
+
+        return view('pos.index', compact('products', 'customers', 'current', 'igvPercent', 'taxLabel', 'pais'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -89,7 +94,11 @@ class PosController extends Controller
                     StockMovement::record($product, -$qty, 'salida', 'venta', $sale->id, 'Venta ' . $sale->series . '-' . $sale->number);
                 }
 
-                $tax = round($total - ($total / 1.18), 2);
+                // Impuesto dinámico según configuración (0% si así está configurado)
+                $pais = \App\Services\Billing\BillingSettings::country();
+                $igvPercent = (float) \App\Models\Setting::get('igv_percent', $pais === 'CL' ? '19' : '18');
+                $taxRate = $igvPercent / 100;
+                $tax = $taxRate > 0 ? round($total - ($total / (1 + $taxRate)), 2) : 0;
                 $sale->update(['subtotal' => round($total - $tax, 2), 'tax' => $tax, 'total' => $total]);
 
                 return $sale;

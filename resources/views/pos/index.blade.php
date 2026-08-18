@@ -34,7 +34,7 @@
                 </div>
 
                 <div class="border-t border-slate-100 mt-3 pt-3 space-y-3">
-                    <div class="flex justify-between text-sm text-slate-500"><span>IGV (18% incl.)</span><span id="taxLabel">S/ 0.00</span></div>
+                    <div class="flex justify-between text-sm text-slate-500"><span>{{ $taxLabel }} ({{ number_format($igvPercent, 0) }}% incl.)</span><span id="taxLabel">S/ 0.00</span></div>
                     <div class="flex justify-between text-lg font-extrabold text-slate-800"><span>Total</span><span id="totalLabel" class="text-brand-600">S/ 0.00</span></div>
 
                     <select name="customer_id" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
@@ -72,6 +72,7 @@
     <script>
         const products = @json($products);
         const cart = {}; // id -> {id, name, price, stock, qty}
+        const taxPercent = {{ $igvPercent }};
         const money = (v) => 'S/ ' + Number(v).toFixed(2);
 
         function renderGrid(filter = '') {
@@ -169,7 +170,7 @@
                 el.appendChild(row);
             });
 
-            const tax = total - (total / 1.18);
+            const tax = taxPercent > 0 ? total - (total / (1 + taxPercent / 100)) : 0;
             document.getElementById('taxLabel').textContent = money(tax);
             document.getElementById('totalLabel').textContent = money(total);
             document.getElementById('payBtn').disabled = ids.length === 0;
