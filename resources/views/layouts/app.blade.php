@@ -143,6 +143,10 @@
                 <h1 class="text-lg font-bold text-slate-800">@yield('title', 'Panel de Control')</h1>
             </div>
             <div class="flex items-center gap-4">
+                <button id="btn-instalar-pwa" onclick="instalarPWA()" class="hidden items-center gap-2 rounded-lg bg-emerald-700 text-white text-sm font-semibold px-3.5 py-2 shadow-sm hover:bg-emerald-800 transition" title="Instalar esta aplicación en tu dispositivo">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                    Instalar App
+                </button>
                 <span class="hidden sm:inline-flex items-center gap-2 text-sm text-slate-500">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
                     {{ \Carbon\Carbon::now()->locale('es')->isoFormat('dddd, DD [de] MMMM [de] YYYY') }}
@@ -191,10 +195,41 @@
 </div>
 
 <script>
+    // ===== PWA: Instalación =====
+    let deferredPrompt = null;
+
     // Registrar Service Worker (PWA)
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+    }
+
+    // Detectar si la app puede instalarse
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        // Mostrar el botón "Instalar App"
+        const btn = document.getElementById('btn-instalar-pwa');
+        if (btn) {
+            btn.classList.remove('hidden');
+            btn.classList.add('inline-flex');
+        }
+    });
+
+    window.addEventListener('appinstalled', () => {
+        deferredPrompt = null;
+        const btn = document.getElementById('btn-instalar-pwa');
+        if (btn) btn.classList.add('hidden');
+    });
+
+    function instalarPWA() {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            const btn = document.getElementById('btn-instalar-pwa');
+            if (btn) btn.classList.add('hidden');
+            deferredPrompt = null;
         });
     }
 </script>
