@@ -23,6 +23,7 @@
                         <th class="px-5 py-3 font-semibold">Proveedor</th>
                         <th class="px-5 py-3 font-semibold">Documento</th>
                         <th class="px-5 py-3 font-semibold text-center">Ítems</th>
+                        <th class="px-5 py-3 font-semibold text-center">Foto</th>
                         <th class="px-5 py-3 font-semibold text-right">Total</th>
                         <th class="px-5 py-3 font-semibold text-right">Acciones</th>
                     </tr>
@@ -34,13 +35,22 @@
                             <td class="px-5 py-3 font-medium text-slate-800">{{ $purchase->supplier?->name ?? 'Sin proveedor' }}</td>
                             <td class="px-5 py-3 text-slate-500">{{ $purchase->document ?: '—' }}</td>
                             <td class="px-5 py-3 text-center text-slate-600">{{ $purchase->items_count }}</td>
+                            <td class="px-5 py-3 text-center">
+                                @if ($purchase->photo_receipt)
+                                    <a href="{{ asset('storage/' . $purchase->photo_receipt) }}" target="_blank" class="inline-block" title="Ver foto boleta">
+                                        <img src="{{ asset('storage/' . $purchase->photo_receipt) }}" alt="Foto" class="w-10 h-10 rounded-lg object-cover border border-slate-200">
+                                    </a>
+                                @else
+                                    <span class="text-slate-300">—</span>
+                                @endif
+                            </td>
                             <td class="px-5 py-3 text-right font-semibold text-slate-800">S/ {{ number_format($purchase->total, 2) }}</td>
                             <td class="px-5 py-3 text-right">
                                 <a href="{{ route('compras.show', $purchase) }}" class="text-sm font-semibold text-brand-600 hover:text-brand-700">Ver detalle</a>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="6" class="px-5 py-10 text-center text-slate-400">No hay compras registradas.</td></tr>
+                        <tr><td colspan="7" class="px-5 py-10 text-center text-slate-400">No hay compras registradas.</td></tr>
                     @endforelse
                 </tbody>
             </table>

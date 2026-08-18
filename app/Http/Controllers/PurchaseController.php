@@ -10,6 +10,7 @@ use App\Models\Supplier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class PurchaseController extends Controller
@@ -37,6 +38,8 @@ class PurchaseController extends Controller
         $data = $request->validate([
             'supplier_id' => ['nullable', 'exists:suppliers,id'],
             'document' => ['nullable', 'string', 'max:50'],
+            'photo_receipt' => ['nullable', 'image', 'max:5120'],  // hasta 5MB (foto boleta)
+            'photo_products' => ['nullable', 'image', 'max:5120'], // hasta 5MB (foto productos)
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'exists:products,id'],
             'items.*.cost' => ['required', 'numeric', 'min:0'],
@@ -46,10 +49,22 @@ class PurchaseController extends Controller
         ]);
 
         DB::transaction(function () use ($data, $request) {
+            // Guarda las fotos si vienen del formulario
+            $photoReceipt = null;
+            $photoProducts = null;
+            if ($request->hasFile('photo_receipt')) {
+                $photoReceipt = $request->file('photo_receipt')->store('compras/comprobantes', 'public');
+            }
+            if ($request->hasFile('photo_products')) {
+                $photoProducts = $request->file('photo_products')->store('compras/productos', 'public');
+            }
+
             $purchase = Purchase::create([
                 'supplier_id' => $data['supplier_id'] ?? null,
                 'user_id' => $request->user()->id,
                 'document' => $data['document'] ?? null,
+                'photo_receipt' => $photoReceipt,
+                'photo_products' => $photoProducts,
                 'status' => 'recibido',
                 'total' => 0,
             ]);

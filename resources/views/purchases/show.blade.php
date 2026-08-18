@@ -19,6 +19,28 @@
                 </div>
             </div>
 
+            {{-- Fotos de la compra --}}
+            @if ($compra->photo_receipt || $compra->photo_products)
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                    @if ($compra->photo_receipt)
+                        <div class="rounded-xl border border-slate-200 p-3">
+                            <p class="text-xs font-semibold text-slate-500 mb-2">📷 Foto de la boleta</p>
+                            <a href="{{ asset('storage/' . $compra->photo_receipt) }}" target="_blank">
+                                <img src="{{ asset('storage/' . $compra->photo_receipt) }}" alt="Foto boleta" class="w-full max-h-64 object-cover rounded-lg">
+                            </a>
+                        </div>
+                    @endif
+                    @if ($compra->photo_products)
+                        <div class="rounded-xl border border-slate-200 p-3">
+                            <p class="text-xs font-semibold text-slate-500 mb-2">📦 Foto de los productos</p>
+                            <a href="{{ asset('storage/' . $compra->photo_products) }}" target="_blank">
+                                <img src="{{ asset('storage/' . $compra->photo_products) }}" alt="Foto productos" class="w-full max-h-64 object-cover rounded-lg">
+                            </a>
+                        </div>
+                    @endif
+                </div>
+            @endif
+
             <table class="w-full text-sm">
                 <thead class="bg-slate-50 text-slate-500 text-left">
                     <tr>

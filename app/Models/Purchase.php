@@ -11,7 +11,7 @@ class Purchase extends Model
 {
     use BelongsToTenant;
 
-    protected $fillable = ['tenant_id', 'supplier_id', 'user_id', 'document', 'total', 'status'];
+    protected $fillable = ['tenant_id', 'supplier_id', 'user_id', 'document', 'photo_receipt', 'photo_products', 'total', 'status'];
 
     protected $casts = ['total' => 'decimal:2'];
 

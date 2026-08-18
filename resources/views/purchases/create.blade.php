@@ -9,7 +9,7 @@
 
         @include('partials.errors')
 
-        <form method="POST" action="{{ route('compras.store') }}" id="purchaseForm">
+        <form method="POST" action="{{ route('compras.store') }}" id="purchaseForm" enctype="multipart/form-data">
             @csrf
             <div class="rounded-2xl bg-white border border-slate-100 shadow-sm p-6 mb-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -26,6 +26,22 @@
                         <label class="block text-sm font-medium text-slate-700 mb-1.5">N° de documento (factura/guía)</label>
                         <input type="text" name="document" value="{{ old('document') }}"
                             class="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none">
+                    </div>
+                </div>
+
+                {{-- Fotos de la compra (boleta y productos) --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-100">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">📷 Foto de la boleta/factura</label>
+                        <input type="file" name="photo_receipt" accept="image/*" capture="environment"
+                            class="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none">
+                        <p class="text-xs text-slate-400 mt-1">Toma una foto del comprobante del mercado</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">📦 Foto de los productos</label>
+                        <input type="file" name="photo_products" accept="image/*" capture="environment"
+                            class="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none">
+                        <p class="text-xs text-slate-400 mt-1">Toma una foto de lo que trajiste</p>
                     </div>
                 </div>
             </div>
